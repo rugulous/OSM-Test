@@ -71,5 +71,26 @@ for member in members:
         missing.append(member)
         
 print(f'Found {len(missing)} missing members!')
-print(missing)
+
+#4. Get member details
+for member in missing:
+    print(f'Getting details for {member["firstname"]} {member["lastname"]}')
+    details = do_request(f'https://www.onlinescoutmanager.co.uk/ext/customdata/?action=getData&section_id={section_id}&associated_id={member["scoutid"]}&associated_type=member&associated_is_section=null&varname_filter=null&context=members&group_order=section')['data']
+
+    for detail in details:
+        if detail["identifier"] == const.CONTACT_ID:
+
+            for col in detail["columns"]:
+                if col["column_id"] == const.CONTACT_PHONE_ID:
+                    phone_number = col['value']
+                    print(f'Found contact number, which is {phone_number}')
+                    print('This is where we would text parents etc')
+                    break
+            else:
+                raise ValueError('No phone number present')
+            break
+    else:
+        raise ValueError('No contact present')
+    
+    print()
     
