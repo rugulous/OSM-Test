@@ -4,7 +4,7 @@ import secrets
 CLIENT_ID = secrets.CLIENT_ID
 CLIENT_SECRET = secrets.CLIENT_SECRET
 TOKEN_URL = 'https://www.onlinescoutmanager.co.uk/oauth/token'
-SCOPES = ['attendance','badge','event','finance','flexirecord','member','programme', 'quartermaster']
+SCOPES = ['attendance','member']
 
 #section
 SECTION_NAME = 'Queensbury Scout Band'
