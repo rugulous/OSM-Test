@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 #config
-const.py
+secrets.py
