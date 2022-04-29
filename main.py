@@ -10,23 +10,29 @@ def get_scopes():
         scopes = scopes + f'section:{scope}:read+'
     return scopes[:-1]
 
+def do_request(url):
+    if token is not None:
+        req = urllib.request.Request(url, None, {"Authorization": f'Bearer {token}'})
+    else:
+        req = url
+
+    resp = urllib.request.urlopen(req).read()
+    return json.loads(resp)
+
 ### needed stuff ###
 token = None
 section_id = None
 term_id = None
+rehearsal_date = '2022-04-28'
 
 #1. Get token
 scopes = get_scopes()
-print(scopes)
-data = urllib.request.urlopen(f'{const.TOKEN_URL}?grant_type=client_credentials&client_id={const.CLIENT_ID}&client_secret={const.CLIENT_SECRET}&scope={scopes}').read()
-token = json.loads(data)['access_token']
+token = do_request(f'{const.TOKEN_URL}?grant_type=client_credentials&client_id={const.CLIENT_ID}&client_secret={const.CLIENT_SECRET}&scope={scopes}')['access_token']
 print(f'Got token: {token}')
 print()
 
 #2. Get section + term from User
-req = urllib.request.Request('https://www.onlinescoutmanager.co.uk/oauth/resource', None, {"Authorization": f'Bearer {token}'})
-data = urllib.request.urlopen(req).read()
-user = json.loads(data)['data']
+user = do_request('https://www.onlinescoutmanager.co.uk/oauth/resource')['data']
 sections = user['sections']
 
 for s in sections:
@@ -54,3 +60,16 @@ for s in sections:
 
 print()
 
+#3. Get attendance
+members = do_request(f'https://www.onlinescoutmanager.co.uk/ext/members/attendance/?action=get&sectionid={section_id}&termid={term_id}')['items']
+missing = []
+for member in members:
+    if not 'active' in member or not member['active'] or member['patrolid'] == -2:
+        continue
+
+    if not rehearsal_date in member:
+        missing.append(member)
+        
+print(f'Found {len(missing)} missing members!')
+print(missing)
+    
